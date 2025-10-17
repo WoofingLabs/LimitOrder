@@ -56,23 +56,23 @@
                 @apply absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-secondary text-dark text-xs rounded hover:bg-secondary/80 transition-all;
             }
             .order-box {
-                @apply bg-dark/90 p-4 rounded-lg border border-primary/20 shadow-lg flex flex-col gap-2;
+                @apply bg-dark/90 p-4 rounded-lg border border-primary/20 shadow-lg flex items-center justify-between gap-4;
             }
             .order-box span {
                 @apply text-sm text-light-gray;
             }
             .order-box button {
-                @apply mt-2 px-4 py-2 rounded-lg font-medium transition-all;
+                @apply px-4 py-2 rounded-lg font-medium transition-all;
             }
             @media (max-width: 640px) {
                 .order-box {
-                    @apply p-3;
+                    @apply p-3 flex-col items-start gap-2;
                 }
                 .order-box span {
                     @apply text-xs;
                 }
                 .order-box button {
-                    @apply px-3 py-1 text-sm;
+                    @apply px-3 py-1 text-sm w-full;
                 }
             }
         }
@@ -152,7 +152,7 @@
                     <div class="section">
                         <div class="text-left text-light-gray mb-3 font-medium">Active Orders</div>
                         <button id="queryOrdersButton" class="w-full px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary/80 transition-all shadow-lg">Query Orders</button>
-                        <div id="activeOrders" class="order-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"></div>
+                        <div id="activeOrders" class="order-list flex flex-col gap-4 mt-4"></div>
                     </div>
                 </div>
             </div>
@@ -218,7 +218,7 @@
             if (!web3 || !account) return;
             try {
                 const balance = await web3.eth.getBalance(account);
-                const maxAmount = Number(web3.utils.fromWei(balance, 'ether')) - 0.1; // 保留 0.1 GT
+                const maxAmount = Number(web3.utils.fromWei(balance, 'ether')) - 0.1;
                 document.getElementById('amountGT').value = maxAmount > 0 ? maxAmount.toFixed(6) : 0;
                 document.getElementById('progressStatus').innerText = `MAX: ${maxAmount.toFixed(6)} GT loaded!`;
                 updatePrice();
@@ -400,10 +400,12 @@
                     const price = amountGDOG > 0 ? (Number(amountGT) / Number(amountGDOG)).toFixed(6) : 0;
                     userOrdersDiv.innerHTML += `
                         <div class="order-box">
-                            <span>ID: ${order.id}</span>
-                            <span>GT: ${amountGT}</span>
-                            <span>GDOG: ${amountGDOG}</span>
-                            <span>Price: ${price} GT/GDOG</span>
+                            <div class="flex flex-col">
+                                <span>ID: ${order.id}</span>
+                                <span>GT: ${amountGT}</span>
+                                <span>GDOG: ${amountGDOG}</span>
+                                <span>Price: ${price} GT/GDOG</span>
+                            </div>
                             ${order.isActive ? `<button class="bg-secondary text-dark hover:bg-secondary/80" onclick="cancelOrder('${order.id}')">Cancel</button>` : '<span class="text-light-gray">Completed</span>'}
                         </div>
                     `;
@@ -429,10 +431,12 @@
                     const price = amountGDOG > 0 ? (Number(amountGT) / Number(amountGDOG)).toFixed(6) : 0;
                     activeOrdersDiv.innerHTML += `
                         <div class="order-box">
-                            <span>ID: ${order.id}</span>
-                            <span>GT: ${amountGT}</span>
-                            <span>GDOG: ${amountGDOG}</span>
-                            <span>Price: ${price} GT/GDOG</span>
+                            <div class="flex flex-col">
+                                <span>ID: ${order.id}</span>
+                                <span>GT: ${amountGT}</span>
+                                <span>GDOG: ${amountGDOG}</span>
+                                <span>Price: ${price} GT/GDOG</span>
+                            </div>
                             <button class="bg-primary text-white hover:bg-primary/80" onclick="fillOrder('${order.id}', '${amountGDOG}')">Buy</button>
                         </div>
                     `;
