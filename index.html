@@ -56,7 +56,24 @@
                 @apply absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-secondary text-dark text-xs rounded hover:bg-secondary/80 transition-all;
             }
             .order-box {
-                @apply bg-dark/80 p-4 rounded-lg border border-primary/20;
+                @apply bg-dark/90 p-4 rounded-lg border border-primary/20 shadow-lg flex flex-col gap-2;
+            }
+            .order-box span {
+                @apply text-sm text-light-gray;
+            }
+            .order-box button {
+                @apply mt-2 px-4 py-2 rounded-lg font-medium transition-all;
+            }
+            @media (max-width: 640px) {
+                .order-box {
+                    @apply p-3;
+                }
+                .order-box span {
+                    @apply text-xs;
+                }
+                .order-box button {
+                    @apply px-3 py-1 text-sm;
+                }
             }
         }
     </style>
@@ -113,8 +130,7 @@
                         </div>
                         <div class="relative">
                             <label class="block text-left text-light-gray mb-3 font-medium">GDOG Amount (You Want)</label>
-                            <input id="amountGDOG" type="number" placeholder="0.0" class="input-field pr-12" min="1" step="any">
-                            <button id="maxGDOGButton" class="max-btn" onclick="setMaxGDOG()">MAX</button>
+                            <input id="amountGDOG" type="number" placeholder="0.0" class="input-field" min="1" step="any">
                         </div>
                         <div class="text-light-gray text-sm py-2">
                             <span>Price per GDOG: <span id="priceInfo">0 GT</span></span>
@@ -202,22 +218,9 @@
             if (!web3 || !account) return;
             try {
                 const balance = await web3.eth.getBalance(account);
-                const maxAmount = Number(web3.utils.fromWei(balance, 'ether')).toFixed(6);
-                document.getElementById('amountGT').value = maxAmount;
-                document.getElementById('progressStatus').innerText = `MAX: ${maxAmount} GT loaded!`;
-                updatePrice();
-            } catch (error) {
-                document.getElementById('progressStatus').innerText = `Error: ${error.message}`;
-            }
-        }
-
-        async function setMaxGDOG() {
-            if (!tokenContract || !account) return;
-            try {
-                const balance = await tokenContract.methods.balanceOf(account).call();
-                const maxAmount = Number(web3.utils.fromWei(balance, 'ether')).toFixed(6);
-                document.getElementById('amountGDOG').value = maxAmount;
-                document.getElementById('progressStatus').innerText = `MAX: ${maxAmount} GDOG loaded!`;
+                const maxAmount = Number(web3.utils.fromWei(balance, 'ether')) - 0.1; // 保留 0.1 GT
+                document.getElementById('amountGT').value = maxAmount > 0 ? maxAmount.toFixed(6) : 0;
+                document.getElementById('progressStatus').innerText = `MAX: ${maxAmount.toFixed(6)} GT loaded!`;
                 updatePrice();
             } catch (error) {
                 document.getElementById('progressStatus').innerText = `Error: ${error.message}`;
@@ -401,7 +404,7 @@
                             <span>GT: ${amountGT}</span>
                             <span>GDOG: ${amountGDOG}</span>
                             <span>Price: ${price} GT/GDOG</span>
-                            ${order.isActive ? `<button class="px-4 py-2 bg-secondary text-dark rounded-lg font-medium hover:bg-secondary/80 transition-all" onclick="cancelOrder('${order.id}')">Cancel</button>` : '<span class="text-light-gray">Completed</span>'}
+                            ${order.isActive ? `<button class="bg-secondary text-dark hover:bg-secondary/80" onclick="cancelOrder('${order.id}')">Cancel</button>` : '<span class="text-light-gray">Completed</span>'}
                         </div>
                     `;
                 });
@@ -430,7 +433,7 @@
                             <span>GT: ${amountGT}</span>
                             <span>GDOG: ${amountGDOG}</span>
                             <span>Price: ${price} GT/GDOG</span>
-                            <button class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/80 transition-all" onclick="fillOrder('${order.id}', '${amountGDOG}')">Buy</button>
+                            <button class="bg-primary text-white hover:bg-primary/80" onclick="fillOrder('${order.id}', '${amountGDOG}')">Buy</button>
                         </div>
                     `;
                 });
@@ -443,7 +446,7 @@
             if (!web3 || !account) return;
             web3.eth.getBalance(account).then(balance => {
                 const balanceFormatted = Number(web3.utils.fromWei(balance, 'ether'));
-                let amount = percentage === 100 ? (balanceFormatted > 0.01 ? (balanceFormatted - 0.01).toFixed(6) : 0) : (balanceFormatted * percentage / 100).toFixed(6);
+                let amount = percentage === 100 ? (balanceFormatted > 0.1 ? (balanceFormatted - 0.1).toFixed(6) : 0) : (balanceFormatted * percentage / 100).toFixed(6);
                 document.getElementById('amountGT').value = amount;
                 updatePrice();
             });
